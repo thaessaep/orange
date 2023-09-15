@@ -74,15 +74,21 @@ func (b *buyerByNews) pushBidForBuy(stockInfoSell []models.StockInfoSell, compan
 		bid := minBid(stock)
 
 		if bid != nil && inCompaniesAffected(companiesAffected, stock.Ticker) {
-			// пушим заявку на покупку
 			bidToPush := models.Bid{
 				SymbolId: stock.Id,
 				Price:    bid.Price,
 				Quantity: 1,
 			}
-			b.postOperationsBid.PushBidBuy(bidToPush)
 
-			result = append(result, bidToPush)
+			// пушим заявку на покупку
+			pushed, err := b.postOperationsBid.PushBidBuy(bidToPush)
+			if err != nil {
+				return nil, err
+			}
+			if pushed {
+				result = append(result, bidToPush)
+			}
+
 		}
 	}
 

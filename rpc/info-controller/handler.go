@@ -42,12 +42,12 @@ func (n *news) LatestNews() (models.News, error) {
 
 	resp, err := client.Do(request)
 	if err != nil {
-		return models.News{}, errors.New("cannot send request")
+		return models.News{}, errors.New(fmt.Sprintf("cannot send request: %s", err))
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return models.News{}, errors.New("cannot read body")
+		return models.News{}, errors.New(fmt.Sprintf("cannot read body: %s", err))
 	}
 
 	n.log.Println(string(body))
@@ -55,7 +55,7 @@ func (n *news) LatestNews() (models.News, error) {
 	var result models.News
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		return models.News{}, err
+		return models.News{}, errors.New(fmt.Sprintf("cannot marshal news: %s", err))
 	}
 
 	return result, nil

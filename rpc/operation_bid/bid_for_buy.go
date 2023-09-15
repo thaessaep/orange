@@ -3,6 +3,8 @@ package operation_bid
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -28,7 +30,7 @@ func (n *news) PushBidBuy(bid models.Bid) (bool, error) {
 
 	body, err := json.Marshal(bid)
 	if err != nil {
-		return false, err
+		return false, errors.New(fmt.Sprintf("cannot marshal bid: %s", err))
 	}
 
 	request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
@@ -37,7 +39,7 @@ func (n *news) PushBidBuy(bid models.Bid) (bool, error) {
 	}
 	request.Header.Add("token", config.Token)
 
-	client := http.Client{Timeout: 10 * time.Second}
+	client := http.Client{Timeout: 1 * time.Second}
 
 	resp, err := client.Do(request)
 	if err != nil {

@@ -2,6 +2,8 @@ package stock_info
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -35,7 +37,7 @@ func (n *news) SalesRequests() ([]models.StockInfoSell, error) {
 
 	resp, err := client.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("cannot take StockInfoSell: %s", err))
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -49,7 +51,7 @@ func (n *news) SalesRequests() ([]models.StockInfoSell, error) {
 
 	err = json.Unmarshal(body, result)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("cannot unmarshal StockInfoSell: %s", err))
 	}
 
 	return result, nil
