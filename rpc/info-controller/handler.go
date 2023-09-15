@@ -1,12 +1,16 @@
 package info_controller
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/thaessaep/config"
+	"github.com/thaessaep/models"
 	"github.com/thaessaep/rpc"
 )
 
@@ -25,28 +29,50 @@ func New(logger *log.Logger) news {
 	}
 }
 
-func (n *news) LatestNews(time time.Time) error {
+func (n *news) LatestNews() (models.News, error) {
 	url := fmt.Sprintf("%s%s", rpc.UrlNews, latestNews)
 
-	resp, err := http.Get(url)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return err
+		return models.News{}, err
+	}
+	request.Header.Add("token", config.Token)
+
+	client := http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(request)
+	if err != nil {
+		return models.News{}, errors.New("cannot send request")
 	}
 
-	result, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return models.News{}, errors.New("cannot read body")
 	}
 
-	n.log.Println(time, string(result))
+	n.log.Println(string(body))
 
-	return nil
+	var result models.News
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return models.News{}, err
+	}
+
+	return result, nil
 }
 
 func (n *news) Last5MinutesNews() error {
-	url := fmt.Sprintf("%s%s", rpc.UrlNews, latest5MinNews)
+	url := rpc.UrlNews + latest5MinNews
 
-	resp, err := http.Get(url)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	request.Header.Add("token", config.Token)
+
+	client := http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(request)
 	if err != nil {
 		return err
 	}
@@ -64,7 +90,15 @@ func (n *news) Last5MinutesNews() error {
 func (n *news) BillingInfo() (string, error) {
 	url := rpc.UrlInfo
 
-	resp, err := http.Get(url)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+	request.Header.Add("token", config.Token)
+
+	client := http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(request)
 	if err != nil {
 		return "", err
 	}

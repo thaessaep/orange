@@ -1,6 +1,8 @@
 package rpc
 
 const (
-	UrlNews = "https://datsorange.devteam.games/news/"
-	UrlInfo = "https://datsorange.devteam.games/info"
+	LimitPriceBuyUrl = "https://datsorange.devteam.games/LimitPriceBuy"
+	SellStockUrl     = "https://datsorange.devteam.games/sellStock"
+	UrlNews          = "https://datsorange.devteam.games/news/"
+	UrlInfo          = "https://datsorange.devteam.games/info"
 )

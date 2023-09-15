@@ -5,7 +5,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/thaessaep/rpc/buyer_by_news"
 	info_controller "github.com/thaessaep/rpc/info-controller"
+	"github.com/thaessaep/rpc/operation_bid"
+	stock_info "github.com/thaessaep/rpc/stock-info"
 )
 
 func main() {
@@ -16,13 +19,36 @@ func main() {
 
 	logger := log.New(file, "INFO\t", log.Ldate|log.Ltime)
 
-	infoController := info_controller.New(logger)
+	bidFile, err := os.OpenFile("bid_operation.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	bidLogger := log.New(bidFile, "INFO\t", log.Ldate|log.Ltime)
 
-	timer := time.NewTimer(5 * time.Minute)
+	newsController := info_controller.New(logger)
+	stockInfoController := stock_info.New(log.New(os.Stdout, "STOCKS INFO\t", log.Ldate|log.Ltime))
+	oparationBidController := operation_bid.New(bidLogger)
+
+	operationBid := buyer_by_news.New(&newsController, &stockInfoController, &oparationBidController)
+
+	timer := time.NewTicker(10 * time.Second)
 	for {
 		select {
 		case <-timer.C:
-			infoController.Last5MinutesNews()
+			_, err := newsController.BillingInfo()
+			if err != nil {
+				panic(err.Error())
+			}
+
+			//news, err := controller.LatestNews()
+			//if err != nil {
+			//	panic(err.Error())
+			//}
+			bids, err := operationBid.PushBidByNews()
+			if err != nil {
+				panic(err.Error())
+			}
+			bidLogger.Println("buy bids: ", bids)
 		}
 	}
 }
