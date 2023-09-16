@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -25,13 +26,19 @@ func main() {
 	}
 	bidLogger := log.New(bidFile, "INFO\t", log.Ldate|log.Ltime)
 
+	//stockFile, err := os.OpenFile("stock_info.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//stockInfoLogger := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
 	newsController := info_controller.New(logger)
-	stockInfoController := stock_info.New(log.New(os.Stdout, "STOCKS INFO\t", log.Ldate|log.Ltime))
+	stockInfoController := stock_info.New(nil)
 	oparationBidController := operation_bid.New(bidLogger)
 
 	operationBid := buyer_by_news.New(&newsController, &stockInfoController, &oparationBidController)
 
-	timer := time.NewTicker(10 * time.Second)
+	timer := time.NewTicker(5 * time.Second)
 	for {
 		select {
 		case <-timer.C:
@@ -46,7 +53,7 @@ func main() {
 			//}
 			bids, err := operationBid.PushBidByNews()
 			if err != nil {
-				panic(err.Error())
+				fmt.Println(err.Error())
 			}
 			bidLogger.Println("buy bids: ", bids)
 		}

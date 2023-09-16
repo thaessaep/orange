@@ -45,11 +45,11 @@ func (n *news) SalesRequests() ([]models.StockInfoSell, error) {
 		return nil, err
 	}
 
-	n.log.Println(string(body))
+	//n.log.Println(string(body))
 
 	var result []models.StockInfoSell
 
-	err = json.Unmarshal(body, result)
+	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("cannot unmarshal StockInfoSell: %s", err))
 	}

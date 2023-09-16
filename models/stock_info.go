@@ -4,7 +4,7 @@ package models
 type StockInfoSell struct {
 	Id     int64     `json:"id"`
 	Ticker string    `json:"ticker"`
-	Bids   []BidStat `json:"bidStat"`
+	Bids   []BidStat `json:",inline"`
 }
 
 type BidStat struct {

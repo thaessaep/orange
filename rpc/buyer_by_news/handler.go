@@ -2,11 +2,12 @@ package buyer_by_news
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/thaessaep/models"
 )
 
-const PriceForBuy = 100
+const PriceForBuy = 500
 
 var lastNews models.News
 
@@ -51,7 +52,7 @@ func (b *buyerByNews) PushBidByNews() ([]models.Bid, error) {
 	// получаем заявки на продажу
 	stockInfoSell, err := b.bidForSell.SalesRequests()
 	if err != nil {
-		return nil, errors.New("cannot take sales requests")
+		return nil, err
 	}
 
 	// если в заявке на продажу rate > 0 -> смотрим цену и если цена нам подходит -> выставляем заявку на покупку
@@ -72,7 +73,7 @@ func (b *buyerByNews) pushBidForBuy(stockInfoSell []models.StockInfoSell, compan
 	var result []models.Bid
 	for _, stock := range stockInfoSell {
 		bid := minBid(stock)
-
+		fmt.Println("check bid", bid)
 		if bid != nil && inCompaniesAffected(companiesAffected, stock.Ticker) {
 			bidToPush := models.Bid{
 				SymbolId: stock.Id,
@@ -100,7 +101,9 @@ func minBid(stock models.StockInfoSell) *models.BidStat {
 	minPrice := int64(PriceForBuy)
 	var result *models.BidStat
 
+	fmt.Println("check stock by bid price", stock)
 	for _, bid := range stock.Bids {
+		fmt.Println("check bid price", bid.Price)
 		if bid.Price < PriceForBuy && bid.Price < minPrice {
 			result = &bid
 		}
